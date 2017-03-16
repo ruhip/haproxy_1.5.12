@@ -41,6 +41,8 @@ extern char default_http_log_format[];
 extern char clf_http_log_format[];
 extern char *logline;
 
+extern char* customer_logpath;
+extern int customer_logfd;
 
 int build_logline(struct session *s, char *dst, size_t maxsize, struct list *list_format);
 

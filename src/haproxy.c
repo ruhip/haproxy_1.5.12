@@ -708,6 +708,11 @@ void init(int argc, char **argv)
 			exit(1);
 	}
 
+        customer_logfd = open(customer_logpath,O_CREAT|O_RDWR|O_APPEND,0);
+        if(  customer_logfd  < 1) {
+              Alert("Fatal errors found in open customer_logpath:%s.\n",customer_logpath);
+        }
+
 	pattern_finalize_config();
 
 	err_code |= check_config_validity();
@@ -1636,6 +1641,8 @@ int main(int argc, char **argv)
 	 * That's it : the central polling loop. Run until we stop.
 	 */
 	run_poll_loop();
+
+        close(customer_logfd);       
 
 	/* Free all Hash Keys and all Hash elements */
 	appsession_cleanup();

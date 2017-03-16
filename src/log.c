@@ -39,6 +39,9 @@
 #include <proto/ssl_sock.h>
 #endif
 
+char* customer_logpath="/usr/local/haproxy/haproxy_customer.log";
+int customer_logfd = -1;
+
 const char *log_facilities[NB_LOG_FACILITIES] = {
 	"kern", "user", "mail", "daemon",
 	"auth", "syslog", "lpr", "news",
@@ -817,7 +820,7 @@ void __send_log(struct proxy *p, int level, char *message, size_t size)
 		const struct logsrv *logsrv = tmp;
 		int *plogfd = logsrv->addr.ss_family == AF_UNIX ?
 			&logfdunix : &logfdinet;
-		int sent;
+		//int sent;
 		int max;
 		char backup;
 
@@ -869,16 +872,28 @@ void __send_log(struct proxy *p, int level, char *message, size_t size)
 		backup = log_ptr[max - 1];
 		log_ptr[max - 1] = '\n';
 
+                /*
 		sent = sendto(*plogfd, log_ptr, max,
 			      MSG_DONTWAIT | MSG_NOSIGNAL,
 			      (struct sockaddr *)&logsrv->addr, get_addr_len(&logsrv->addr));
+                */
+              
+                  
+                if( customer_logfd > 0 )
+                {
+                      int nwrite = write(customer_logfd, log_ptr, max);
+                      if( nwrite < max )
+                      {
+                         Alert("froad write: logger #%d failed: %s (errno=%d)\n",nblogger, strerror(errno), errno);
+                      }
+                }
 
 		log_ptr[max - 1] = backup;
-
+                /*
 		if (sent < 0) {
 			Alert("sendto logger #%d failed: %s (errno=%d)\n",
 				nblogger, strerror(errno), errno);
-		}
+		}*/
 	}
 }
 
